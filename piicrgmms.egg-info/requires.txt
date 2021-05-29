@@ -1,0 +1,8 @@
+scikit-learn
+pandas
+matplotlib
+lmfit
+joblib
+tqdm
+pillow
+webcolors
