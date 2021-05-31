@@ -1,10 +1,15 @@
 # piicrgmms
 
 A package for implementing Gaussian mixture models as a data 
-analysis tool in PI-ICR Mass Spectroscopy experiments. It was
-first developed in the Fall of 2020 to be used in PI-ICR 
-experiments at Argonne National Laboratory (Lemont, IL, U.S.).
-At its core is a modified version of the ['mixture' module 
+analysis tool in PI-ICR Mass Spectrometry experiments. piicrgmms 
+was first developed in the Fall of 2020 to be used in PI-ICR 
+experiments at the Canadian Penning Trap (CPT) mass 
+spectrometer at Argonne National Laboratory (Lemont, IL, U.S.). 
+It was originally published as 
+[GMMClusteringAlgorithms](https://pypi.org/project/GMMClusteringAlgorithms/), 
+but was repackaged as piicrgmms in preparation for the 
+publication of an upcoming journal article about its use.
+At piicrgmms' core is a modified version of the ['mixture' module 
 from the package scikit-learn.](https://scikit-learn.org/stable/modules/mixture.html)
 The modified version, *sklearn_mixture_piicr*, retains all 
 the same components as the 
