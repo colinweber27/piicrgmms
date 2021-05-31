@@ -745,7 +745,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         inputs = tqdm(test_n_comps)
         ic_list = []
 
-        if __name__ == 'GMMClusteringAlgorithms.classes._gaussian_mixture_model':
+        if __name__ == 'piicrgmms.classes._gaussian_mixture_model':
             func = partial(self._gmm_fit, x)  # Initialize function to be processed
             results = Parallel(n_jobs=n_cores)(delayed(func)(i)  # Process results
                                                for i in inputs)
@@ -810,7 +810,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
             data = data_frame_object.data_array_[
                    :, (2, 3)]
 
-        if __name__ == 'GMMClusteringAlgorithms.classes._gaussian_mixture_model':
+        if __name__ == 'piicrgmms.classes._gaussian_mixture_model':
             func = partial(self._gmm_fit, data)  # Initialize function to be processed
             results = Parallel(n_jobs=n_cores)(delayed(func)(i)  # Process function
                                                for i in inputs)
