@@ -260,13 +260,12 @@ class BayesianGaussianMixture(GaussianMixtureBase):
 
         if self.coordinates == 'Cartesian':
             # Calculate the radii and phases of cluster centers, with standard errors
-            rs = np.sqrt(np.square(np.subtract(c1s, xC)) +
-                         np.square(np.subtract(c2s, yC)))
+            rs = np.sqrt((c1s - xC) ** 2 + (c2s - yC) ** 2)
             rs_err = (1 / rs) * np.sqrt((c1s_err * (c1s - xC)) ** 2 +
                                         (xC_unc * (c1s - xC)) ** 2 +
                                         (c2s_err * (c2s - yC)) ** 2 +
                                         (yC_unc * (c2s - yC)) ** 2)
-            ps = np.rad2deg(np.arctan(np.divide(np.subtract(c2s, yC), np.subtract(c1s, xC))))
+            ps = np.rad2deg(np.arctan((c2s - yC) / (c1s - xC)))
             for i in range(len(c1s)):
                 if c1s[i] - xC < 0:
                     ps[i] += 180
@@ -277,8 +276,7 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                                                         (c1s_err * (c2s - yC)) ** 2 +
                                                         (xC_unc * (c2s - yC)) ** 2))
 
-            cluster_err = np.sqrt(np.add(np.square(c1s_err),
-                                         np.square(c2s_err)))
+            cluster_err = np.sqrt(c1s_err ** 2 + c2s_err ** 2)
 
             self.centers_array_ = np.vstack((c1s, c1s_err, c2s,
                                              c2s_err, rs, rs_err,
@@ -316,8 +314,7 @@ class BayesianGaussianMixture(GaussianMixtureBase):
             ys_err = np.sqrt((c1s_err * np.sin(phases)) ** 2 +
                              (phases_err * c1s * np.cos(phases)) ** 2 +
                              yC_unc ** 2)
-            cluster_err = np.sqrt(np.add(np.square(xs_err),
-                                         np.square(ys_err)))
+            cluster_err = np.sqrt(xs_err ** 2 + ys_err ** 2)
 
             self.centers_array_ = np.vstack((xs, xs_err, ys, ys_err,
                                              c1s, c1s_err, c2s,
@@ -490,7 +487,7 @@ class BayesianGaussianMixture(GaussianMixtureBase):
 
                     c1_fit_array = np.array(c1_fit)
                     c2_fit_array = np.array(c2_fit)
-                    if c1_fit[1] >= 5 or c2_fit[1] >= 5:
+                    if c1_fit[1] == None or c2_fit[1] == None or c1_fit[1] >= 5 or c2_fit[1] >= 5:
 
                         c1, c1_err = wt_avg_unc_number(c1_cut, width_c1)
                         c2, c2_err = wt_avg_unc_number(c2_cut, width_c2)
@@ -565,6 +562,12 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                     c1s_err.append(self.centers_array_[i, 5])
                     c2s.append(self.centers_array_[i, 6])
                     c2s_err.append(self.centers_array_[i, 7])
+                cluster_err.append(self.centers_array_[i, 8])
+
+        c1s = np.array(c1s)
+        c1s_err = np.array(c1s_err)
+        c2s = np.array(c2s)
+        c2s_err = np.array(c2s_err)
 
         self._calc_secondary_centers_unc(c1s, c1s_err, c2s, c2s_err,
                                          data_frame_object)
