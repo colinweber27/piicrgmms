@@ -53,8 +53,8 @@ of 4 classes, and visualization methods for debugging.
 * Only works with Polar coordinates
 
 Each model class also includes the ability to visualize
-results in several ways (clustering results, One-dimensional
-histograms, Probability density function) and the ability to
+results in several ways (clustering results, one-dimensional
+histograms, probability density functions) and the ability to
 copy fit results to the clipboard for pasting into an Excel
 spreadsheet.
 
