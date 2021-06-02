@@ -225,7 +225,7 @@ class BayesianGaussianMixture(GaussianMixtureBase):
         return model
 
     def _calc_secondary_centers_unc(self, c1s, c1s_err, c2s,
-                                    c2s_err, data_frame_object: object):
+                                    c2s_err, data_frame_object: object, inds_to_do=None):
         """Calculate the coordinates of the cluster centers for the coordinate system that
         was not used for the fit.
 
@@ -250,10 +250,15 @@ class BayesianGaussianMixture(GaussianMixtureBase):
         c2s_err : array-like, shape (n_components,)
             The standard error in the c2s.
 
+
         data_frame_object : DataFrame class object
             The object that contains the processed data and
             information that is used by the algorithms to do the
             fits.
+
+        inds_to_do : ndarray, defaults to c1s.shape[0] (optional)
+            The indices adjusted in the function self.recalculate_centers_uncertainties.
+            Applies only when using Polar coordinates.
         """
         xC, yC = data_frame_object.center
         xC_unc, yC_unc = data_frame_object.center_unc
@@ -286,19 +291,25 @@ class BayesianGaussianMixture(GaussianMixtureBase):
         else:  # if self.coordinates == 'Polar':
             # Calculate the x- and y- coordinates of the cluster centers, with standard errors.
             # First, ensure data is not phase shifted.
+            if inds_to_do is None:
+                inds_to_do = np.arange(0, self.n_comps_found_)
             if data_frame_object.phase_shifted_:
                 shift = data_frame_object.phase_shift_
 
-                c2s += shift
+                c2s[inds_to_do] += shift
+                c2s = np.where(c2s < 0, c2s + 360, c2s)
                 c2s = np.where(c2s > 360, c2s - 360, c2s)
 
                 self.means_[:, 1] += shift
                 self.means_[:, 1] = np.where(
                     self.means_[:, 1] > 360, self.means_[:, 1] - 360, self.means_[:, 1])
+                self.means_[:, 1] = np.where(
+                    self.means_[:, 1] < 0, self.means_[:, 1] + 360, self.means_[:, 1])
 
                 p_raw = data_frame_object.data_array_[:, 3]
                 p_raw += shift
                 p_raw = np.where(p_raw > 360, p_raw - 360, p_raw)
+                p_raw = np.where(p_raw < 0, p_raw + 360, p_raw)
                 data_frame_object.data_array_[:, 3] = p_raw
                 data_frame_object.phase_shifted_ = False
 
@@ -514,9 +525,6 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                         c2_fw_hm_abs.append(0)
                         c2_fw_hm_err.append(0)
 
-                        cluster_err.append(
-                            np.sqrt(c2_err ** 2 + c1_err ** 2))
-
                     else:
                         c1s.append(c1_fit_array[0])
                         c1s_err.append(c1_fit_array[1])
@@ -540,9 +548,21 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                         c2_fw_hm_abs.append(c2_fit_array[8])
                         c2_fw_hm_err.append(c2_fit_array[9])
 
-                        cluster_err.append(
-                            np.sqrt(c1_fit_array[1] ** 2 +
-                                    c2_fit_array[1] ** 2))
+                        c1 = c1_fit_array[0]
+                        c1_err = c1_fit_array[1]
+                        c2 = c2_fit_array[0]
+                        c2_err = c2_fit_array[1]
+
+                    if self.coordinates == 'Cartesian':
+                        err = np.sqrt(c1_err ** 2 + c2_err ** 2)
+                    else:  # if self.coordinates == 'Polar':
+                        c2 = np.deg2rad(c2)
+                        c2_err = np.deg2rad(c2_err)
+                        err = np.sqrt((c1_err * np.cos(c2)) ** 2 +
+                                      (c2_err * c1 * np.sin(c2)) ** 2 +
+                                      (c1_err * np.sin(c2)) ** 2 +
+                                      (c2_err * c1 * np.cos(c2)) ** 2)
+                    cluster_err.append(err)
 
                 plt.title('BGM %i comps c1_bins (cadetblue) = %i ; c2_bins '
                           '(orange) = %i\n(c1, c2) = (%0.2f,%0.2f),'
@@ -570,7 +590,8 @@ class BayesianGaussianMixture(GaussianMixtureBase):
         c2s_err = np.array(c2s_err)
 
         self._calc_secondary_centers_unc(c1s, c1s_err, c2s, c2s_err,
-                                         data_frame_object)
+                                         data_frame_object, inds_to_do=inds_to_do)
+
 
     def _cluster_data_one_d(self, x):
         """Use the Bayesian Gaussian mixture fit from the sklearn package to cluster the data.

@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: piicrgmms
-Version: 0.0.4
+Version: 0.0.5
 Summary: A data analysis package for PI-ICR Mass Spectroscopy
 Home-page: https://pypi.org/project/piicrgmms/
 Author: Colin Weber
@@ -64,8 +64,8 @@ Description: # piicrgmms
         * Only works with Polar coordinates
         
         Each model class also includes the ability to visualize
-        results in several ways (clustering results, One-dimensional
-        histograms, Probability density function) and the ability to
+        results in several ways (clustering results, one-dimensional
+        histograms, probability density functions) and the ability to
         copy fit results to the clipboard for pasting into an Excel
         spreadsheet.
         
@@ -106,7 +106,7 @@ Description: # piicrgmms
           
         
         
-Keywords: Gaussian Mixture Models,Clustering Algorithms,Machine Learning,Mass Spectroscopy
+Keywords: Gaussian Mixture Models,Clustering Algorithms,Machine Learning,Mass Spectrometry
 Platform: UNKNOWN
 Classifier: Programming Language :: Python :: 3
 Classifier: License :: OSI Approved :: MIT License

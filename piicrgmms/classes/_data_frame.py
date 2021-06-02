@@ -87,6 +87,8 @@ def shift_phase_dimension(data_frame_object: object):
     # is now centered near 0deg.
     phase_data = np.where(
         phase_data < 0, phase_data + 360, phase_data)
+    phase_data = np.where(
+        phase_data > 360, phase_data - 360, phase_data)
     # For all the points lower than 0deg, add 360deg to put them
     # in the correct range.
     plt.close()
@@ -123,9 +125,10 @@ class DataFrame:
         the limits, inclusive, will be analyzed.
 
     ion_cut: tuple, defaults to (0, np.inf)
-        The limits on the number of ions present in each data point.
-        If the number of ions in a point falls outside of these
-        values, that point will not be analyzed.
+        The limits on the number of ions present in each data point,
+        not inclusive. If the number of ions in a point is equal to
+        these values or falls outside them, that point will not be
+        analyzed.
 
     tof_cut: tuple, defaults to (-50000,-10000)
         The limits on the tof of the points, in ns. If a point's
