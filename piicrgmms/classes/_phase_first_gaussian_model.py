@@ -278,15 +278,7 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
             information that is used by the algorithms to do the
             fits.
         """
-        self.unique_labels_ = np.unique(self.labels_)
-        labels_list = self.labels_.tolist()
-        ips = []
-        for n in self.unique_labels_:
-            cluster_ions = labels_list.count(n)
-            ips.append(cluster_ions)
-        self.ips_ = np.array(ips).reshape(-1,)
-
-        if len(ips) != len(self.weights_):
+        if len(self.ips_) != len(self.weights_):
             self.means_ = self.means_[self.unique_labels_, :]
             self.weights_ = self.weights_[self.unique_labels_]
             if self.cov_type == 'spherical':
@@ -304,25 +296,25 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         c2s = self.means_[:, 1]
 
         if self.cov_type == 'spherical':
-            c1s_err = np.sqrt(self.covariances_ / np.array(ips))
+            c1s_err = np.sqrt(self.covariances_ / self.ips_)
             c2s_err = c1s_err
         elif self.cov_type == 'diag':
             c1s_err = np.sqrt(
-                self.covariances_[:, 0] / np.array(ips))
+                self.covariances_[:, 0] / self.ips_)
             c2s_err = np.sqrt(
-                self.covariances_[:, 1] / np.array(ips))
+                self.covariances_[:, 1] / self.ips_)
         elif self.cov_type == 'tied':
             c1_covs = np.full(
                 (self.n_comps_found_,), self.covariances_[0, 0])
             c2_covs = np.full(
                 (self.n_comps_found_,), self.covariances_[1, 1])
-            c1s_err = np.sqrt(c1_covs / np.array(ips))
-            c2s_err = np.sqrt(c2_covs / np.array(ips))
+            c1s_err = np.sqrt(c1_covs / self.ips_)
+            c2s_err = np.sqrt(c2_covs / self.ips_)
         else:  # if self.cov_type == 'full':
             c1s_err = np.sqrt(
-                self.covariances_[:, 0, 0] / np.array(ips))
+                self.covariances_[:, 0, 0] / self.ips_)
             c2s_err = np.sqrt(
-                self.covariances_[:, 1, 1] / np.array(ips))
+                self.covariances_[:, 1, 1] / self.ips_)
 
         self._calc_secondary_centers_unc(c1s, c1s_err, c2s, c2s_err,
                                          data_frame_object)
@@ -614,11 +606,35 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         model.phase_constrained_fit(polar_data)
 
         # Assign attributes
-        self.means_ = model.means_
-        self.covariances_ = model.covariances_
-        self.weights_ = model.weights_
-        self.labels_ = model.predict(polar_data)
-        self.responsibilities_ = model.predict_proba(polar_data)
+        self.labels_ = model.predict(data)
+        self.unique_labels_ = np.unique(self.labels_)
+        labels_list = self.labels_.tolist()
+        ips = []
+        for n in self.unique_labels_:
+            cluster_ions = labels_list.count(n)
+            ips.append(cluster_ions)
+        self.ips_ = np.array(ips).reshape(-1, )
+
+        sorted_indices = np.argsort(self.ips_)
+        sorted_indices = np.flip(sorted_indices)
+        sort_u_l = self.unique_labels_[sorted_indices].tolist()
+
+        self.means_ = model.means_[sorted_indices]
+        if self.cov_type != 'tied':
+            self.covariances_ = model.covariances_[sorted_indices]
+        else:
+            self.covariances_ = model.covariances_
+        self.weights_ = model.weights_[sorted_indices]
+        self.labels_ = np.array([sort_u_l.index(self.labels_[i]) for i in
+                                 range(self.labels_.shape[0])])
+        self.unique_labels_ = np.unique(self.labels_)
+        labels_list = self.labels_.tolist()
+        ips = []
+        for n in self.unique_labels_:
+            cluster_ions = labels_list.count(n)
+            ips.append(cluster_ions)
+        self.ips_ = np.array(ips).reshape(-1, )
+        self.responsibilities_ = model.predict_proba(data)[:, sorted_indices]
         self.n_comps_found_ = np.shape(self.weights_)[0]
         self.clustered_ = True
 
@@ -667,11 +683,35 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         model.phase_constrained_fit(polar_data)
 
         # Assign attributes
-        self.means_ = model.means_
-        self.covariances_ = model.covariances_
-        self.weights_ = model.weights_
         self.labels_ = model.predict(polar_data)
-        self.responsibilities_ = model.predict_proba(polar_data)
+        self.unique_labels_ = np.unique(self.labels_)
+        labels_list = self.labels_.tolist()
+        ips = []
+        for n in self.unique_labels_:
+            cluster_ions = labels_list.count(n)
+            ips.append(cluster_ions)
+        self.ips_ = np.array(ips).reshape(-1, )
+
+        sorted_indices = np.argsort(self.ips_)
+        sorted_indices = np.flip(sorted_indices)
+        sort_u_l = self.unique_labels_[sorted_indices].tolist()
+
+        self.means_ = model.means_[sorted_indices]
+        if self.cov_type != 'tied':
+            self.covariances_ = model.covariances_[sorted_indices]
+        else:
+            self.covariances_ = model.covariances_
+        self.weights_ = model.weights_[sorted_indices]
+        self.labels_ = np.array([sort_u_l.index(self.labels_[i]) for i in
+                                 range(self.labels_.shape[0])])
+        self.unique_labels_ = np.unique(self.labels_)
+        labels_list = self.labels_.tolist()
+        ips = []
+        for n in self.unique_labels_:
+            cluster_ions = labels_list.count(n)
+            ips.append(cluster_ions)
+        self.ips_ = np.array(ips).reshape(-1, )
+        self.responsibilities_ = model.predict_proba(polar_data)[:, sorted_indices]
         self.n_comps_found_ = np.shape(self.weights_)[0]
         self.clustered_ = True
 

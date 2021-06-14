@@ -22,10 +22,13 @@ quick, intuitive use of the GMM algorithms through the use
 of 4 classes, and visualization methods for debugging.
 
 #### 1. DataFrame
-* This class is responsible for processing the .lmf 
-  file and phase shifts. As attributes, it holds the 
-  processed data for easy access, as well as any data 
-  cuts.
+* This class is responsible for processing the raw data from 
+  the position-sensitive micro-channel plate (PS-MCP) 
+  detector. It currently only works with List Mode (.lmf) 
+  files, which is the file type used by CoboldPC, the 
+  software used at the CPT to record data from the PS-MCP. 
+  As attributes, it holds the processed data for easy access 
+  as well as any data cuts.
   
 #### 2. GaussianMixtureModel
 * This class fits Gaussian mixture models to the 

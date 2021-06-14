@@ -102,9 +102,10 @@ def shift_phase_dimension(data_frame_object: object):
 class DataFrame:
     """Class for the data frame.
 
-    This class is used as an organizational tool for the lmf files
-    and their parameters. Objects from this class are what is
-    manipulated by the clustering algorithms.
+    This class is used as an organizational tool for the .lmf
+    files from CoboldPC and their parameters. Objects created
+    with this class are what is manipulated by the clustering
+    algorithms.
 
     version : 0.1
 
