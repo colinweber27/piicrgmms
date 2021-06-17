@@ -5,11 +5,11 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="piicrgmms",
-    version="0.0.7",
+    version="0.0.8",
     author="Colin Weber",
     author_email="colin.weber.27@gmail.com",
     url='https://pypi.org/project/piicrgmms/',
-    description="A data analysis package for PI-ICR Mass Spectroscopy",
+    description="A data analysis package for PI-ICR Mass Spectrometry",
     long_description=long_description,
     long_description_content_type="text/markdown",
     project_urls={

@@ -3,7 +3,7 @@ Gaussian mixture models from the sklearn package."""
 
 # Author: Colin Weber
 # Contact: colin.weber.27@gmail.com
-# Contributors: Adrian Valverde and Dwaipayan Ray
+# Contributors: Adrian Valverde, Dwaipayan Ray, and Dmitry Gorelov
 # License: MIT
 
 import os
@@ -267,8 +267,8 @@ class DataFrame:
     def process_lmf(self):
         """Process the .lmf data file.
 
-        This method was written by Dwaipayan Ray and
-        Adrian Valverde.
+        This method was written by Dmitry Gorelov with contributions from
+        Dwaipayan Ray and Adrian Valverde.
 
         Returns
         --------

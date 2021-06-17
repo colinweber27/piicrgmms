@@ -1,7 +1,7 @@
 # piicrgmms
 
 A package for implementing Gaussian mixture models as a data 
-analysis tool in PI-ICR Mass Spectrometry experiments. piicrgmms 
+analysis tool in PI-ICR mass spectrometry experiments. piicrgmms 
 was first developed in the Fall of 2020 to be used in PI-ICR 
 experiments at the Canadian Penning Trap (CPT) mass 
 spectrometer at Argonne National Laboratory (Lemont, IL, U.S.). 
