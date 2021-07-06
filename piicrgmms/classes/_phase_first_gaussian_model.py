@@ -111,7 +111,7 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         An array containing the centers of each component and
         their uncertainties in each of the 4 coordinate dimensions,
         as well as the cluster uncertainty.
-        
+
     ips_ : array-like, shape (n_components,)
         The number of ions in each cluster.
 
@@ -120,9 +120,9 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
 
     colors_ : list, len = n_components
         A list of the colors of each cluster.
-        
+
     noise_colors_ : list
-        A list of the colors of each cluster that has been identified as a noise cluster, which 
+        A list of the colors of each cluster that has been identified as a noise cluster, which
         is one that we can't conclude is composed of identical ion species.
     """
 
@@ -262,7 +262,7 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         self.centers_array_ = np.vstack((xs, xs_err, ys, ys_err,
                                          c1s, c1s_err, c2s,
                                          c2s_err, cluster_err)).T
-        
+
         self._identify_noise_colors()
 
     def _calculate_centers_uncertainties(self, data_frame_object: object):
@@ -366,11 +366,11 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
             inds_to_do = np.array(indices)
 
         c1s, c1s_err, c1_chi_sq, c1_red_chi_sq, c1_sigma_abs, \
-            c1_sigma_err, c1_height_abs, c1_height_err, c1_fw_hm_abs, \
-            c1_fw_hm_err = [], [], [], [], [], [], [], [], [], []
+        c1_sigma_err, c1_height_abs, c1_height_err, c1_fw_hm_abs, \
+        c1_fw_hm_err = [], [], [], [], [], [], [], [], [], []
         c2s, c2s_err, c2_chi_sq, c2_red_chi_sq, c2_sigma_abs, \
-            c2_sigma_err, c2_height_abs, c2_height_err, c2_fw_hm_abs, \
-            c2_fw_hm_err = [], [], [], [], [], [], [], [], [], []
+        c2_sigma_err, c2_height_abs, c2_height_err, c2_fw_hm_abs, \
+        c2_fw_hm_err = [], [], [], [], [], [], [], [], [], []
         cluster_err = []
 
         for i in cluster_ind:
@@ -493,8 +493,8 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
                 plt.title('Phase First GM %i c1_bins (cadetblue) = %i ; c2_bins '
                           '(orange) = %i\n(c1, c2) = (%0.2f,%0.2f),'
                           'Cluster unc=%0.5f' % (
-                            self.n_comps_found_, num_bins(c1_cut),
-                            num_bins(c2_cut), c1s[i], c2s[i], cluster_err[i]))
+                              self.n_comps_found_, num_bins(c1_cut),
+                              num_bins(c2_cut), c1s[i], c2s[i], cluster_err[i]))
                 plt.xlim(-10, 10)
                 plt.show()
             else:
@@ -606,7 +606,7 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         model.phase_constrained_fit(polar_data)
 
         # Assign attributes
-        self.labels_ = model.predict(data)
+        self.labels_ = model.predict(polar_data)
         self.unique_labels_ = np.unique(self.labels_)
         labels_list = self.labels_.tolist()
         ips = []
@@ -634,7 +634,7 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
             cluster_ions = labels_list.count(n)
             ips.append(cluster_ions)
         self.ips_ = np.array(ips).reshape(-1, )
-        self.responsibilities_ = model.predict_proba(data)[:, sorted_indices]
+        self.responsibilities_ = model.predict_proba(polar_data)[:, sorted_indices]
         self.n_comps_found_ = np.shape(self.weights_)[0]
         self.clustered_ = True
 
@@ -925,10 +925,10 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         plt.title("Phase First GMM %s total counts: %i; total "
                   "clusters: %i, Cov=%s\n%s\nTOF cut=%s, Ion cut=%s, "
                   "Rad cut=%s, Time cut=%s" % (
-                    self.ic, n_samples, self.n_comps_found_, self.cov_type,
-                    data_frame_object.file[0:-4], data_frame_object.tof_cut,
-                    data_frame_object.ion_cut, data_frame_object.rad_cut,
-                    data_frame_object.time_cut))
+                      self.ic, n_samples, self.n_comps_found_, self.cov_type,
+                      data_frame_object.file[0:-4], data_frame_object.tof_cut,
+                      data_frame_object.ion_cut, data_frame_object.rad_cut,
+                      data_frame_object.time_cut))
 
         plt.xlabel('X [mm]', weight='bold')
         plt.ylabel('Y [mm]', weight='bold')
@@ -943,35 +943,35 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
                 r"%s%i counts (%.1f%%), x=%.3f$\pm$ %.3f, "
                 r"y=%.3f$\pm$%.3f, r=%.3f$\pm$%.3f, "
                 r"p=%.3f$\pm$%.3f" % (('*' if self.colors_[i] in self.noise_colors_ else ''),
-                    self.ips_[i], 100.0 * self.ips_[i] / n_samples,
-                    self.centers_array_[i, 0],
-                    self.centers_array_[i, 1],
-                    self.centers_array_[i, 2],
-                    self.centers_array_[i, 3],
-                    self.centers_array_[i, 4],
-                    self.centers_array_[i, 5],
-                    self.centers_array_[i, 6],
-                    self.centers_array_[i, 7]))
+                                      self.ips_[i], 100.0 * self.ips_[i] / n_samples,
+                                      self.centers_array_[i, 0],
+                                      self.centers_array_[i, 1],
+                                      self.centers_array_[i, 2],
+                                      self.centers_array_[i, 3],
+                                      self.centers_array_[i, 4],
+                                      self.centers_array_[i, 5],
+                                      self.centers_array_[i, 6],
+                                      self.centers_array_[i, 7]))
         labels.append(discarded_counts_stuff)
 
         label_indices = np.arange(0, len(self.unique_labels_))
         for k, col, index in zip(self.unique_labels_, self.colors_,
                                  label_indices):
             my = self.labels_ == k
-            axs.add_artist(
-                plt.Circle((self.centers_array_[index, 0],
-                            self.centers_array_[index, 2]),
-                           radius=self.centers_array_[index, 8],
-                           fill=False, color='red'))
+            # axs.add_artist(
+            #     plt.Circle((self.centers_array_[index, 0],
+            #                 self.centers_array_[index, 2]),
+            #                radius=self.centers_array_[index, 8],
+            #                fill=False, color='red'))
 
             plt.plot(data_array[my, 0], data_array[my, 1], 'o',
                      color=col, markersize=3, label="%s:\n%s" % (
                     col, labels[index]))
 
-        plt.errorbar(center_array[:, 0], center_array[:, 2],
-                     yerr=center_array[:, 3], xerr=center_array[:, 1],
-                     elinewidth=1, capsize=1, ls='', marker='o',
-                     markersize=1, color='red')
+        # plt.errorbar(center_array[:, 0], center_array[:, 2],
+        #              yerr=center_array[:, 3], xerr=center_array[:, 1],
+        #              elinewidth=1, capsize=1, ls='', marker='o',
+        #              markersize=1, color='red')
 
         legend_stuff = plt.legend(
             loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1,
@@ -984,9 +984,9 @@ class PhaseFirstGaussianModel(GaussianMixtureBase):
         save_string = 'Phase First GMM %s Results, %s, %s, %s ' \
                       'Clusters, timecut=%s,radcut=%s,tofcut=%s,' \
                       'ioncut=%s.jpeg' % (
-                        self.ic, data_frame_object.file[0:-4], self.cov_type,
-                        self.n_comps_found_, data_frame_object.time_cut,
-                        data_frame_object.rad_cut, data_frame_object.tof_cut,
-                        data_frame_object.ion_cut)
+                          self.ic, data_frame_object.file[0:-4], self.cov_type,
+                          self.n_comps_found_, data_frame_object.time_cut,
+                          data_frame_object.rad_cut, data_frame_object.tof_cut,
+                          data_frame_object.ion_cut)
 
         return fig, save_string

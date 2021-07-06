@@ -1,7 +1,7 @@
 Metadata-Version: 2.1
 Name: piicrgmms
-Version: 0.0.7
-Summary: A data analysis package for PI-ICR Mass Spectroscopy
+Version: 0.0.8
+Summary: A data analysis package for PI-ICR Mass Spectrometry
 Home-page: https://pypi.org/project/piicrgmms/
 Author: Colin Weber
 Author-email: colin.weber.27@gmail.com
@@ -12,7 +12,7 @@ Project-URL: Download, https://pypi.org/project/piicrgmms/#files
 Description: # piicrgmms
         
         A package for implementing Gaussian mixture models as a data 
-        analysis tool in PI-ICR Mass Spectrometry experiments. piicrgmms 
+        analysis tool in PI-ICR mass spectrometry experiments. piicrgmms 
         was first developed in the Fall of 2020 to be used in PI-ICR 
         experiments at the Canadian Penning Trap (CPT) mass 
         spectrometer at Argonne National Laboratory (Lemont, IL, U.S.). 

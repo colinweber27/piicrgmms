@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="piicrgmms",
-    version="0.0.8",
+    version="0.0.9",
     author="Colin Weber",
     author_email="colin.weber.27@gmail.com",
     url='https://pypi.org/project/piicrgmms/',
