@@ -142,14 +142,14 @@ def gauss_model_2save(x_min, x_max, data, num_bin, *args):
 
     x_bins[0] >= 3, else:
       TypeError: Improper input: N=3 must not exceed M=2
-    
+
     From scipy.optimize.curve_fit: M >= N; N variables (fitting 
     parameters), M values (number of data points, i.e. len(x)). 
     For GaussianModel(), N=3 (amplitude (A), center(mu) and sigma) 
     Model : f(x; A,mu, sigma) = {A / [sigma * sqrt(2 * pi)]} * 
     exp{-(x-mu)**2 / (2 * sigma**2)}.
     Therefore, M in this case is len(x_bins[0]).
-    
+
     https://docs.scipy.org/doc/scipy/reference/generated/scipy.optimize.curve_fit.html
     '''
 
@@ -215,7 +215,7 @@ def gauss_model_2save(x_min, x_max, data, num_bin, *args):
     plt.xlim(x_min, x_max)
 
     return center_abs, center_err, chi_sq, red_chi_sq, sigma_abs, \
-        sigma_err, height_abs, height_err, fw_hm_abs, fw_hm_err
+           sigma_err, height_abs, height_err, fw_hm_abs, fw_hm_err
 
 
 class GaussianMixtureModel(GaussianMixtureBase):
@@ -304,23 +304,23 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
     n_comps_found_ : int, defaults to n_components
         The number of components found by the fit.
-        
+
     centers_array_ : array-like, shape (n_components, 9)
-        An array containing the centers of each component and 
+        An array containing the centers of each component and
         their uncertainties in each of the 4 coordinate dimensions,
         as well as the cluster uncertainty.
-        
+
     ips_ : array-like, shape (n_components,)
         The number of ions in each cluster.
-        
+
     unique_labels_ : array-like, shape (n_components,)
         The labels used in the clustering fit.
-        
+
     colors_ : list, len = n_components
         A list of the colors of each cluster.
-        
+
     noise_colors_ : list
-        A list of the colors of each cluster that has been identified as a noise cluster, which 
+        A list of the colors of each cluster that has been identified as a noise cluster, which
         is one that we can't conclude is composed of identical ion species.
     """
 
@@ -436,16 +436,28 @@ class GaussianMixtureModel(GaussianMixtureBase):
                                         (xC_unc * (c1s - xC)) ** 2 +
                                         (c2s_err * (c2s - yC)) ** 2 +
                                         (yC_unc * (c2s - yC)) ** 2)
-            ps = np.rad2deg(np.arctan((c2s - yC) / (c1s - xC)))
-            for i in range(len(c1s)):
-                if c1s[i] - xC < 0:
-                    ps[i] += 180
-                if c1s[i] - xC > 0 > c2s[i] - yC:
-                    ps[i] += 360
-            ps_err = np.rad2deg((1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
-                                                        (yC_unc * (c1s - xC)) ** 2 +
-                                                        (c1s_err * (c2s - yC)) ** 2 +
-                                                        (xC_unc * (c2s - yC)) ** 2))
+            if data_frame_object.phase_units == 'deg':
+                ps = np.rad2deg(np.arctan((c2s - yC) / (c1s - xC)))
+                for i in range(len(c1s)):
+                    if c1s[i] - xC < 0:
+                        ps[i] += 180
+                    if c1s[i] - xC > 0 > c2s[i] - yC:
+                        ps[i] += 360
+                ps_err = np.rad2deg((1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
+                                                            (yC_unc * (c1s - xC)) ** 2 +
+                                                            (c1s_err * (c2s - yC)) ** 2 +
+                                                            (xC_unc * (c2s - yC)) ** 2))
+            else:
+                ps = np.arctan((c2s - yC) / (c1s - xC))
+                for i in range(len(c1s)):
+                    if c1s[i] - xC < 0:
+                        ps[i] += np.pi
+                    if c1s[i] - xC > 0 > c2s[i] - yC:
+                        ps[i] += 2 * np.pi
+                ps_err = (1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
+                                                 (yC_unc * (c1s - xC)) ** 2 +
+                                                 (c1s_err * (c2s - yC)) ** 2 +
+                                                 (xC_unc * (c2s - yC)) ** 2)
 
             cluster_err = np.sqrt(c1s_err ** 2 + c2s_err ** 2)
 
@@ -604,11 +616,11 @@ class GaussianMixtureModel(GaussianMixtureBase):
             inds_to_do = np.array(indices)
 
         c1s, c1s_err, c1_chi_sq, c1_red_chi_sq, c1_sigma_abs, \
-            c1_sigma_err, c1_height_abs, c1_height_err, c1_fw_hm_abs, \
-            c1_fw_hm_err = [], [], [], [], [], [], [], [], [], []
+        c1_sigma_err, c1_height_abs, c1_height_err, c1_fw_hm_abs, \
+        c1_fw_hm_err = [], [], [], [], [], [], [], [], [], []
         c2s, c2s_err, c2_chi_sq, c2_red_chi_sq, c2_sigma_abs, \
-            c2_sigma_err, c2_height_abs, c2_height_err, c2_fw_hm_abs, \
-            c2_fw_hm_err = [], [], [], [], [], [], [], [], [], []
+        c2_sigma_err, c2_height_abs, c2_height_err, c2_fw_hm_abs, \
+        c2_fw_hm_err = [], [], [], [], [], [], [], [], [], []
         cluster_err = []
 
         for i in cluster_ind:
@@ -805,7 +817,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
             best_ic = min(ic_list)
             model = results[ic_list.index(best_ic)]
 
-            # Assign attributes         
+            # Assign attributes
             self.means_ = model.means_
             self.covariances_ = model.covariances_
             self.weights_ = model.weights_

@@ -270,16 +270,28 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                                         (xC_unc * (c1s - xC)) ** 2 +
                                         (c2s_err * (c2s - yC)) ** 2 +
                                         (yC_unc * (c2s - yC)) ** 2)
-            ps = np.rad2deg(np.arctan((c2s - yC) / (c1s - xC)))
-            for i in range(len(c1s)):
-                if c1s[i] - xC < 0:
-                    ps[i] += 180
-                if c1s[i] - xC > 0 > c2s[i] - yC:
-                    ps[i] += 360
-            ps_err = np.rad2deg((1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
-                                                        (yC_unc * (c1s - xC)) ** 2 +
-                                                        (c1s_err * (c2s - yC)) ** 2 +
-                                                        (xC_unc * (c2s - yC)) ** 2))
+            if data_frame_object.phase_units == 'deg':
+                ps = np.rad2deg(np.arctan((c2s - yC) / (c1s - xC)))
+                for i in range(len(c1s)):
+                    if c1s[i] - xC < 0:
+                        ps[i] += 180
+                    if c1s[i] - xC > 0 > c2s[i] - yC:
+                        ps[i] += 360
+                ps_err = np.rad2deg((1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
+                                                            (yC_unc * (c1s - xC)) ** 2 +
+                                                            (c1s_err * (c2s - yC)) ** 2 +
+                                                            (xC_unc * (c2s - yC)) ** 2))
+            else:
+                ps = np.arctan((c2s - yC) / (c1s - xC))
+                for i in range(len(c1s)):
+                    if c1s[i] - xC < 0:
+                        ps[i] += np.pi
+                    if c1s[i] - xC > 0 > c2s[i] - yC:
+                        ps[i] += 2 * np.pi
+                ps_err = (1 / rs ** 2) * np.sqrt((c2s_err * (c1s - xC)) ** 2 +
+                                                 (yC_unc * (c1s - xC)) ** 2 +
+                                                 (c1s_err * (c2s - yC)) ** 2 +
+                                                 (xC_unc * (c2s - yC)) ** 2)
 
             cluster_err = np.sqrt(c1s_err ** 2 + c2s_err ** 2)
 

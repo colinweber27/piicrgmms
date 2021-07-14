@@ -9,17 +9,22 @@ It was originally published as
 [GMMClusteringAlgorithms](https://pypi.org/project/GMMClusteringAlgorithms/), 
 but was repackaged as piicrgmms in preparation for the 
 publication of an upcoming journal article about its use.
+
 At piicrgmms' core is a modified version of the ['mixture' module 
 from the package scikit-learn.](https://scikit-learn.org/stable/modules/mixture.html)
 The modified version, *sklearn_mixture_piicr*, retains all 
 the same components as the 
 original version. In addition, it contains two classes with 
-restricted fitting algorithms: a GMM fit where the phase 
+restricted fitting algorithms: a Gaussian mixture model fit using 
+the expectation-maximization algorithm where the phase 
 dimension of the component means is _not_ a parameter, and a
-BGM fit where the number of components is _not_ a parameter.
+Bayesian Gaussian Mixture fit where the number of components is 
+_not_ a parameter.
+
 The rest of the package facilitates
-quick, intuitive use of the GMM algorithms through the use 
-of 4 classes, and visualization methods for debugging.
+quick, intuitive use of the Gaussian mixture model algorithms 
+through the use of 4 classes, with visualization methods for 
+displaying results and debugging.
 
 #### 1. DataFrame
 * This class is responsible for processing the raw data from 
