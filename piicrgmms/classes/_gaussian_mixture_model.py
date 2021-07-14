@@ -391,7 +391,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         return model
 
     def _calc_secondary_centers_unc(self, c1s, c1s_err, c2s,
-                                    c2s_err, data_frame_object: object, inds_to_do=None):
+                                    c2s_err, data_frame_object, inds_to_do=None):
         """Calculate the coordinates of the cluster centers for the coordinate system that
         was not used for the fit.
 
@@ -463,25 +463,43 @@ class GaussianMixtureModel(GaussianMixtureBase):
                 shift = data_frame_object.phase_shift_
 
                 c2s[inds_to_do] += shift
-                c2s = np.where(c2s < 0, c2s + 360, c2s)
-                c2s = np.where(c2s > 360, c2s - 360, c2s)
+                if data_frame_object.phase_units == 'deg':
+                    c2s = np.where(c2s < 0, c2s + 360, c2s)
+                    c2s = np.where(c2s > 360, c2s - 360, c2s)
+                else:
+                    c2s = np.where(c2s < 0, c2s + 2 * np.pi, c2s)
+                    c2s = np.where(c2s > 2 * np.pi, c2s - 2 * np.pi, c2s)
 
                 self.means_[:, 1] += shift
-                self.means_[:, 1] = np.where(
-                    self.means_[:, 1] > 360, self.means_[:, 1] - 360, self.means_[:, 1])
-                self.means_[:, 1] = np.where(
-                    self.means_[:, 1] < 0, self.means_[:, 1] + 360, self.means_[:, 1])
+                if data_frame_object.phase_units == 'deg':
+                    self.means_[:, 1] = np.where(
+                        self.means_[:, 1] > 360, self.means_[:, 1] - 360, self.means_[:, 1])
+                    self.means_[:, 1] = np.where(
+                        self.means_[:, 1] < 0, self.means_[:, 1] + 360, self.means_[:, 1])
+                else:
+                    self.means_[:, 1] = np.where(
+                        self.means_[:, 1] > 2 * np.pi, self.means_[:, 1] - 2 * np.pi, self.means_[:, 1])
+                    self.means_[:, 1] = np.where(
+                        self.means_[:, 1] < 0, self.means_[:, 1] + 2 * np.pi, self.means_[:, 1])
 
                 p_raw = data_frame_object.data_array_[:, 3]
                 p_raw += shift
-                p_raw = np.where(p_raw > 360, p_raw - 360, p_raw)
-                p_raw = np.where(p_raw < 0, p_raw + 360, p_raw)
+                if data_frame_object.phase_units == 'deg':
+                    p_raw = np.where(p_raw > 360, p_raw - 360, p_raw)
+                    p_raw = np.where(p_raw < 0, p_raw + 360, p_raw)
+                else:
+                    p_raw = np.where(p_raw > 2 * np.pi, p_raw - 2 * np.pi, p_raw)
+                    p_raw = np.where(p_raw < 0, p_raw + 2 * np.pi, p_raw)
                 data_frame_object.data_array_[:, 3] = p_raw
                 data_frame_object.phase_shifted_ = False
 
-            # Convert to radians
-            phases = np.deg2rad(c2s)
-            phases_err = np.deg2rad(c2s_err)
+            # Convert to radians, if necessary
+            if data_frame_object.phase_units == 'deg':
+                phases = np.deg2rad(c2s)
+                phases_err = np.deg2rad(c2s_err)
+            else:
+                phases = c2s
+                phases_err = c2s_err
 
             xs = (c1s * np.cos(phases)) + xC
             xs_err = np.sqrt((c1s_err * np.cos(phases)) ** 2 +
@@ -500,7 +518,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
         self._identify_noise_colors()
 
-    def _calculate_centers_uncertainties(self, data_frame_object: object):
+    def _calculate_centers_uncertainties(self, data_frame_object):
         """After clustering the data, organize the cluster centers into a more accessible format.
 
         Assigns the attributes 'centers_array_', 'ips_',
@@ -550,7 +568,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         for i in self.unique_labels_:
             self.colors_.append(colors[i])
 
-    def recalculate_centers_uncertainties(self, data_frame_object: object, indices=None):
+    def recalculate_centers_uncertainties(self, data_frame_object, indices=None):
         """Recalculate the centers of each cluster and the uncertainties in the centers.
 
         This uses a different method from simply extracting the centers
@@ -649,7 +667,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
                     c1_fit_array = np.array(c1_fit)
                     c2_fit_array = np.array(c2_fit)
-                    if c1_fit[1] == None or c2_fit[1] == None or c1_fit[1] >= 5 or c2_fit[1] >= 5:
+                    if c1_fit[1] is None or c2_fit[1] is None or c1_fit[1] >= 5 or c2_fit[1] >= 5:
 
                         c1, c1_err = wt_avg_unc_number(c1_cut, width_c1)
                         c2, c2_err = wt_avg_unc_number(c2_cut, width_c2)
@@ -707,8 +725,9 @@ class GaussianMixtureModel(GaussianMixtureBase):
                     if self.coordinates == 'Cartesian':
                         err = np.sqrt(c1_err ** 2 + c2_err ** 2)
                     else:  # if self.coordinates == 'Polar':
-                        c2 = np.deg2rad(c2)
-                        c2_err = np.deg2rad(c2_err)
+                        if data_frame_object.phase_units == 'deg':
+                            c2 = np.deg2rad(c2)
+                            c2_err = np.deg2rad(c2_err)
                         err = np.sqrt((c1_err * np.cos(c2)) ** 2 +
                                       (c2_err * c1 * np.sin(c2)) ** 2 +
                                       (c1_err * np.sin(c2)) ** 2 +
@@ -854,7 +873,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
             # Assign attributes
             self.labels_ = model.predict(data)
             self.unique_labels_ = np.unique(self.labels_)
-            labels_list = self.labels_.tolist()
+            labels_list = list(self.labels_.flatten())
             ips = []
             for n in self.unique_labels_:
                 cluster_ions = labels_list.count(n)
@@ -863,7 +882,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
             sorted_indices = np.argsort(self.ips_)
             sorted_indices = np.flip(sorted_indices)
-            sort_u_l = self.unique_labels_[sorted_indices].tolist()
+            sort_u_l = list(self.unique_labels_[sorted_indices].flatten())
 
             self.means_ = model.means_[sorted_indices]
             if self.cov_type != 'tied':
@@ -874,7 +893,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
             self.labels_ = np.array([sort_u_l.index(self.labels_[i]) for i in
                                      range(self.labels_.shape[0])])
             self.unique_labels_ = np.unique(self.labels_)
-            labels_list = self.labels_.tolist()
+            labels_list = list(self.labels_.flatten())
             ips = []
             for n in self.unique_labels_:
                 cluster_ions = labels_list.count(n)
@@ -917,7 +936,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         # Assign attributes
         self.labels_ = model.predict(data)
         self.unique_labels_ = np.unique(self.labels_)
-        labels_list = self.labels_.tolist()
+        labels_list = list(self.labels_.flatten())
         ips = []
         for n in self.unique_labels_:
             cluster_ions = labels_list.count(n)
@@ -926,7 +945,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
         sorted_indices = np.argsort(self.ips_)
         sorted_indices = np.flip(sorted_indices)
-        sort_u_l = self.unique_labels_[sorted_indices].tolist()
+        sort_u_l = list(self.unique_labels_[sorted_indices].flatten())
 
         self.means_ = model.means_[sorted_indices]
         if self.cov_type != 'tied':
@@ -937,7 +956,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         self.labels_ = np.array([sort_u_l.index(self.labels_[i]) for i in
                                  range(self.labels_.shape[0])])
         self.unique_labels_ = np.unique(self.labels_)
-        labels_list = self.labels_.tolist()
+        labels_list = list(self.labels_.flatten())
         ips = []
         for n in self.unique_labels_:
             cluster_ions = labels_list.count(n)
@@ -950,13 +969,13 @@ class GaussianMixtureModel(GaussianMixtureBase):
         self._calculate_centers_uncertainties(data_frame_object)
 
     def fit_over_one_dimensional_histograms(self, fig: object, axs,
-                                            data_frame_object: object):
+                                            data_frame_object):
         """Fit over the histograms generated with the data frame object.
 
         Given a data frame object that has already been used
         to generate histograms for each dimension of data, this
         method will graph a GMM fit over each dimension. The returned
-        matplotlib.plyplot figure may be shown with the method plt.show()
+        matplotlib.pyplot figure may be shown with the method plt.show()
         or saved with the method plt.savefig() separately.
 
         Parameters
@@ -983,12 +1002,17 @@ class GaussianMixtureModel(GaussianMixtureBase):
             shift_phase_dimension(data_frame_object)
         data = data_frame_object.data_array_
 
+        if data_frame_object.phase_units == 'deg':
+            phase_max = 360
+        else:
+            phase_max = 2 * np.pi
+
         for n in range(0, np.shape(data)[1]):
             raw_data = data[:, n].reshape(-1, 1)
             data_range = max(raw_data) - min(raw_data)
             self._cluster_data_one_d(raw_data)
             x_values_min = (min(raw_data) - 0.1 * data_range) if n != 3 else 0
-            x_values_max = (max(raw_data) + 0.1 * data_range) if n != 3 else 360
+            x_values_max = (max(raw_data) + 0.1 * data_range) if n != 3 else phase_max
             x_values = np.linspace(x_values_min, x_values_max, 1000)
             pdf_values = np.array([0] * 1000).reshape(-1, 1)
             for i in range(0, self.n_comps_found_):
@@ -1014,10 +1038,10 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
         return fig
 
-    def get_pdf_fig(self, data_frame_object: object):
+    def get_pdf_fig(self, data_frame_object):
         """Plot the pdf of the Gaussian mixture on a surface.
 
-        The returned matplotlib.plyplot figure can be shown and saved
+        The returned matplotlib.pyplot figure can be shown and saved
         separately.
 
         Parameters
@@ -1064,7 +1088,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
             x1_grid_len = np.complex(0, 1000)
 
             x2_grid_min = 0
-            x2_grid_max = 360
+            x2_grid_max = 360 if data_frame_object.phase_units == 'deg' else 2 * np.pi
             x2_grid_len = np.complex(0, 1000)
 
         x1_values, x2_values = np.mgrid[
@@ -1098,7 +1122,10 @@ class GaussianMixtureModel(GaussianMixtureBase):
 
         if self.coordinates == 'Polar':
             rads = x1_values
-            phases = np.deg2rad(x2_values)
+            if data_frame_object.phase_units == 'deg':
+                phases = np.deg2rad(x2_values)
+            else:
+                phases = x2_values
             x1_values = np.multiply(rads, np.cos(phases))
             x2_values = np.multiply(rads, np.sin(phases))
 
@@ -1107,7 +1134,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         title_string = 'GMM PDF (Cov type=%s, ' \
                        'n-components=%i)\n' % (self.cov_type,
                                                self.n_comps_found_)
-        title_string += data_frame_object.file[0:-4] + '\n'
+        title_string += data_frame_object.file.split('\\')[-1][:-4] + '\n'
         title_string += 'TOF cut=(%.3f,%.3f), ' % \
                         data_frame_object.tof_cut
         title_string += 'Ion cut=%s, ' % (data_frame_object.ion_cut,)
@@ -1122,17 +1149,17 @@ class GaussianMixtureModel(GaussianMixtureBase):
         save_string = 'GMM %s %s PDF, %s, %s, %s Clusters, ' \
                       'timecut=%s,radcut=%s,tofcut=%s,' \
                       'ioncut=%s.jpeg' % (
-                          self.ic, self.coordinates, data_frame_object.file[0:-4],
+                          self.ic, self.coordinates, data_frame_object.file.split('\\')[-1][:-4],
                           self.cov_type, self.n_comps_found_,
                           data_frame_object.time_cut, data_frame_object.rad_cut,
                           data_frame_object.tof_cut, data_frame_object.ion_cut)
 
         return fig, save_string
 
-    def get_results_fig(self, data_frame_object: object):
+    def get_results_fig(self, data_frame_object):
         """Return the clustering results.
 
-        The returned matplotlib.plyplot figure may be shown
+        The returned matplotlib.pyplot figure may be shown
         with the method plt.show() or saved with the method
         plt.savefig() separately. This method was written by
         Dwaipayan Ray and Adrian Valverde.
@@ -1175,7 +1202,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
                   "Time cut=%s" % (self.ic, self.coordinates,
                                    n_samples, self.n_comps_found_,
                                    self.cov_type,
-                                   data_frame_object.file[0:-4],
+                                   data_frame_object.file.split('\\')[-1][:-4],
                                    data_frame_object.tof_cut,
                                    data_frame_object.ion_cut,
                                    data_frame_object.rad_cut,
@@ -1191,7 +1218,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         labels = []
         for i in range(len(self.ips_)):
             labels.append(
-                r"%s%i counts (%.1f%%), x=%.3f$\pm$ %.3f, "
+                r"%s%i counts (%.1f%%), x=%.3f$\pm$%.3f, "
                 r"y=%.3f$\pm$%.3f, r=%.3f$\pm$%.3f, "
                 r"p=%.3f$\pm$%.3f" % (('*' if self.colors_[i] in self.noise_colors_ else ''),
                                       self.ips_[i], 100.0 * self.ips_[i] / n_samples,
@@ -1235,7 +1262,7 @@ class GaussianMixtureModel(GaussianMixtureBase):
         save_string = 'GMM %s %s Results, %s, %s, %s Clusters, ' \
                       'timecut=%s,radcut=%s,tofcut=%s,' \
                       'ioncut=%s.jpeg' % (
-                          self.ic, self.coordinates, data_frame_object.file[0:-4],
+                          self.ic, self.coordinates, data_frame_object.file.split('\\')[-1][:-4],
                           self.cov_type, self.n_comps_found_,
                           data_frame_object.time_cut, data_frame_object.rad_cut,
                           data_frame_object.tof_cut, data_frame_object.ion_cut)

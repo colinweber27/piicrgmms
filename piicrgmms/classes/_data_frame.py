@@ -6,7 +6,6 @@ Gaussian mixture models from the sklearn package."""
 # Contributors: Adrian Valverde, Dwaipayan Ray, and Dmitry Gorelov
 # License: MIT
 
-import os
 import struct
 import time
 import pandas as pd
@@ -17,7 +16,7 @@ import matplotlib.pyplot as plt
 def num_bins(x):
     """Calculate the number of bins to use for a histogram of the data x.
 
-    Uses the common rule of thumb num_bins = sqrt(x).
+    Uses the general rule of thumb num_bins = np.sqrt(x).
 
         Parameters
         ----------
@@ -33,31 +32,11 @@ def num_bins(x):
     return n
 
 
-def _check_directory(directory):
-    """Check the parameter 'directory' to make sure it is an existing str.
-
-    Parameters
-    ----------
-    directory: str
-        The directory to check.
-    """
-    if not isinstance(directory, str):
-        raise TypeError(
-            "The parameter 'directory' must be a string, but got "
-            "type %s instead." % type(directory))
-
-    if not os.path.isdir(directory):
-        raise ValueError(
-            "The parameter 'directory' specifies a directory which "
-            "does not exist. Either create a new directory, or "
-            "change the parameter to point to an existing one.")
-
-
-def shift_phase_dimension(data_frame_object: object):
+def shift_phase_dimension(data_frame_object):
     """Shift the phase dimension of the data prior to analyzing.
 
     This is done to minimize the errors that arise because of
-    Python's not recognizing that 0deg = 360deg.
+    Python's not recognizing that 0deg = 360deg and 0 rad = 2 * np.pi rad.
 
     Parameters
     ----------
@@ -71,30 +50,57 @@ def shift_phase_dimension(data_frame_object: object):
               "'shift_phase_dimension'.")
         exit()
 
-    phase_data = data_frame_object.data_array_[:, 3]
-    p_raw_bins = plt.hist(
-        phase_data, bins=num_bins(phase_data), range=(0, 360),
-        weights=None, alpha=0.6)  # Bin the data
-    centers = (p_raw_bins[1][:-1] + p_raw_bins[1][1:]) / 2.0
-    # Extract the centers
-    p_raw_mask = p_raw_bins[0] == min(p_raw_bins[0])
-    # Generate a matrix of all False except True at the index of
-    # the minimum bin.
-    shift = centers[p_raw_mask][0]
-    # Get the center of the minimum bin
-    phase_data = phase_data - shift
-    # Shift all the data points down such that the minimum bin
-    # is now centered near 0deg.
-    phase_data = np.where(
-        phase_data < 0, phase_data + 360, phase_data)
-    phase_data = np.where(
-        phase_data > 360, phase_data - 360, phase_data)
-    # For all the points lower than 0deg, add 360deg to put them
-    # in the correct range.
-    plt.close()
-    # Because we don't need to see the histogram of the data.
-    data_frame_object.data_array_[:, 3] = phase_data
-    data_frame_object.phase_shift_ = shift
+    if data_frame_object.phase_units == 'deg':
+        phase_data = data_frame_object.data_array_[:, 3]
+        p_raw_bins = plt.hist(
+            phase_data, bins=num_bins(phase_data), range=(0, 360),
+            weights=None, alpha=0.6)  # Bin the data
+        centers = (p_raw_bins[1][:-1] + p_raw_bins[1][1:]) / 2.0
+        # Extract the centers
+        p_raw_mask = p_raw_bins[0] == min(p_raw_bins[0])
+        # Generate a matrix of all False except True at the index of
+        # the minimum bin.
+        shift = centers[p_raw_mask][0]
+        # Get the center of the minimum bin
+        phase_data = phase_data - shift
+        # Shift all the data points down such that the minimum bin
+        # is now centered near 0deg.
+        phase_data = np.where(
+            phase_data < 0, phase_data + 360, phase_data)
+        phase_data = np.where(
+            phase_data > 360, phase_data - 360, phase_data)
+        # For all the points lower than 0deg, add 360deg to put them
+        # in the correct range.
+        plt.close()
+        # Because we don't need to see the histogram of the data.
+        data_frame_object.data_array_[:, 3] = phase_data
+        data_frame_object.phase_shift_ = shift
+
+    else:
+        phase_data = data_frame_object.data_array_[:, 3]
+        p_raw_bins = plt.hist(
+            phase_data, bins=num_bins(phase_data), range=(0, 2 * np.pi),
+            weights=None, alpha=0.6)  # Bin the data
+        centers = (p_raw_bins[1][:-1] + p_raw_bins[1][1:]) / 2.0
+        # Extract the centers
+        p_raw_mask = p_raw_bins[0] == min(p_raw_bins[0])
+        # Generate a matrix of all False except True at the index of
+        # the minimum bin.
+        shift = centers[p_raw_mask][0]
+        # Get the center of the minimum bin
+        phase_data = phase_data - shift
+        # Shift all the data points down such that the minimum bin
+        # is now centered near 0deg.
+        phase_data = np.where(
+            phase_data < 0, phase_data + 2 * np.pi, phase_data)
+        phase_data = np.where(
+            phase_data > 2 * np.pi, phase_data - 2 * np.pi, phase_data)
+        # For all the points lower than 0deg, add 360deg to put them
+        # in the correct range.
+        plt.close()
+        # Because we don't need to see the histogram of the data.
+        data_frame_object.data_array_[:, 3] = phase_data
+        data_frame_object.phase_shift_ = shift
 
     data_frame_object.phase_shifted_ = True
 
@@ -111,12 +117,8 @@ class DataFrame:
 
     Parameters
     ----------
-    directory: str, defaults to active directory
-        The directory that contains the .lmf file to be clustered.
-
     file: str, defaults to None
-        The .lmf file to be clustered. Requires entire filename,
-        including extension '.lmf'.
+        The full path name of the .lmf file to be clustered. Must include extension '.lmf'.
 
     center: tuple, defaults to (0,0)
         The Cartesian coordinates of the center of the CPT.
@@ -140,6 +142,12 @@ class DataFrame:
         in seconds. 0 corresponds to the beginning of the run.
         Only samples with a timestamp within this window will be
         analyzed.
+
+    phase_units: {'deg' (default), 'rad'}
+        The units for the phase dimension of the data. Must be one of:
+        'deg', for degrees
+        'rad', for radians
+
 
     Attributes
     ----------
@@ -165,13 +173,14 @@ class DataFrame:
         The amount the phase dimension has been shifted prior to
         fitting. This is done to improve the fit results by
         minimizing errors that result from Python's not naturally
-        recognizing that 0deg = 360deg.
+        recognizing that 0deg = 360deg and 0 rad = 2 * np.pi rad.
     """
 
-    def __init__(self, *, directory=os.path.dirname(os.path.realpath(__file__)),
-                 file=None, center=(0, 0), center_unc=(0, 0), rad_cut=(0, np.inf),
-                 ion_cut=(0, np.inf), tof_cut=(-50000, -10000), time_cut=(0, np.inf)):
-        self.directory = directory
+    def __init__(self, file, *, center=(0, 0), center_unc=(0, 0), rad_cut=(0, np.inf),
+                 ion_cut=(0, np.inf), tof_cut=(-50000, -10000), time_cut=(0, np.inf),
+                 phase_units='deg'):
+        if not isinstance(file, str):
+            file = str(file)
         self.file = file
         self.center = center
         self.center_unc = center_unc
@@ -179,6 +188,7 @@ class DataFrame:
         self.ion_cut = ion_cut
         self.tof_cut = tof_cut
         self.time_cut = time_cut
+        self.phase_units = phase_units
         self.processed_ = False
         self.phase_shifted_ = False
         self.data_frame_ = None
@@ -187,19 +197,6 @@ class DataFrame:
 
     def _check_initial_parameters(self):
         """Check values of the inputted parameters."""
-        _check_directory(self.directory)
-
-        if not isinstance(self.file, str):
-            raise TypeError("The parameter 'file' "
-                            "must be a string, but got "
-                            "type %s instead." %
-                            type(self.directory))
-
-        if not self.file.lower().endswith('.lmf'):
-            raise ValueError("The parameter 'file' needs to be"
-                             "a string of a valid .lmf file with"
-                             "the string '.lmf' at the end.")
-
         if not isinstance(self.center, tuple):
             raise TypeError("The parameter 'center' "
                             "should be a tuple, but got "
@@ -264,6 +261,16 @@ class DataFrame:
                              "then the upper limit, of the"
                              "allowable time stamps for the data.")
 
+        if not isinstance(self.phase_units, str):
+            raise TypeError("The parameter 'phase_units' "
+                            "should be a string, but got type "
+                            "%s instead." % type(self.phase_units))
+
+        if self.phase_units not in ['deg', 'rad']:
+            raise ValueError("The parameter 'phase_units' "
+                             "must be either 'deg' or 'rad', "
+                             "but got %s instead." % self.phase_units)
+
     def process_lmf(self):
         """Process the .lmf data file.
 
@@ -286,10 +293,8 @@ class DataFrame:
         xC = self.center[0]
         yC = self.center[1]
 
-        filename = self.directory + '/' + self.file
-
         # Read the .lmf file
-        file = open(filename, 'rb')  # 'rb' r for read, b for binary
+        file = open(self.file, 'rb')  # 'rb' r for read, b for binary
         file.seek(0, 2)  # Go to the last byte of the file '2'=os.SEEK_END
         LMFileSize = file.tell()  # Returns the position of the last byte = file's size
         file.seek(0, 0)  # Go to the beginning of the file '0'=os.SEEK_BEG
@@ -331,7 +336,7 @@ class DataFrame:
             '%Y-%m-%d %H-%M-%S', (time.localtime(LMStopTime)))  # type(stop_time_ = str
         runtime = lmf_stop_time_int - lmf_start_time_int
 
-        print("%s" % self.file)
+        print("%s" % self.file.split('\\')[-1])
         print("Start:           %s" % start_time)
         print("Stop:            %s" % stop_time)
         print("Runtime [s]:     %d" % runtime)
@@ -463,7 +468,10 @@ class DataFrame:
         data_df['Tof [ns]'] = data_df_prel['Tof']
         data_df['TStamp [s]'] = data_df_prel['TStamp']
         data_df['Radius [mm]'] = data_df_prel['Radius']
-        data_df['Phase [deg]'] = data_df_prel['Phase']
+        if self.phase_units == 'rad':
+            data_df['Phase [deg]'] = np.deg2rad(data_df_prel['Phase'])
+        else:  # if self.phase_units == 'deg':
+            data_df['Phase [deg]'] = data_df_prel['Phase']
         data_df['Ions in that Shot'] = data_df_prel["Ions_that_shot"]
 
         data_df['TDC Ch1: X1 [ns]'] = data_df_prel['X1']
@@ -500,9 +508,8 @@ class DataFrame:
                 "'_save_processed_data'.")
 
         writer = pd.ExcelWriter(
-            self.directory + '%s, tof_cut=%s, ion_cut=%s, '
-                             'rad_cut=%s, time_cut=%s.xlsx' %
-            (self.file[0:-4], self.tof_cut, self.ion_cut,
+            '%s, tof_cut=%s, ion_cut=%s, rad_cut=%s, time_cut=%s.xlsx' %
+            (self.file.split('\\')[-1][:-4], self.tof_cut, self.ion_cut,
              self.rad_cut, self.time_cut))
         self.data_frame_.to_excel(writer, 'sheet1')
 
@@ -584,7 +591,7 @@ class DataFrame:
 
         save_string = '%s_UNCLUSTERED,tof_cut=%s,ion_cut=%s,' \
                       'rad_cut=%s,time_cut=%s.jpeg' % \
-                      (self.file[0:-4], self.tof_cut, self.ion_cut,
+                      (self.file.split('\\')[-1][:-4], self.tof_cut, self.ion_cut,
                        self.rad_cut, self.time_cut)
 
         return plot, save_string
@@ -639,30 +646,32 @@ class DataFrame:
                 histtype='stepfilled')
             axs[row, col].set(ylabel='Counts')
         # Plot the phase histogram
+        range_max = 360 if self.phase_units == 'deg' else 2 * np.pi
         axs[1, 1].hist(
             self.data_array_[:, 3],
             bins=num_bins(self.data_array_[:, 3]),
-            range=(0, 360), weights=None, alpha=0.6, color='blue',
+            range=(0, range_max), weights=None, alpha=0.6, color='blue',
             histtype='stepfilled')
         axs[1, 1].set(ylabel='Counts')
 
         # Add axis labels
+        phase_xlabel = 'Phase(deg)' if self.phase_units == 'deg' else 'Phase(rad)'
         axs[0, 0].set(title='X Dimension', xlabel='X(mm)')
         axs[0, 1].set(title='Y Dimension', xlabel='Y(mm)')
         axs[1, 0].set(title='Radial Dimension', xlabel='Radius(mm)')
-        axs[1, 1].set(title='Phase Dimension', xlabel='Phase(deg)')
+        axs[1, 1].set(title='Phase Dimension', xlabel=phase_xlabel)
 
         # Finishing touches
         fig.suptitle(
             'Histograms of Dimensions\n%s\nTOF cut=%s, Ion cut=%s, '
             'Rad cut=%s, Time cut=%s' %
-            (self.file[0:-4], self.tof_cut, self.ion_cut, self.rad_cut,
+            (self.file.split('\\')[-1][:-4], self.tof_cut, self.ion_cut, self.rad_cut,
              self.time_cut))
         fig.tight_layout()
 
         save_string = 'Histograms of Dimensions, %s, tof_cut=%s, ' \
                       'ion_cut=%s, rad_cut=%s, time_cut=%s.jpeg' \
-                      % (self.file[0:-4], self.tof_cut, self.ion_cut,
+                      % (self.file.split('\\')[-1][:-4], self.tof_cut, self.ion_cut,
                          self.rad_cut, self.time_cut)
 
         return fig, axs, save_string

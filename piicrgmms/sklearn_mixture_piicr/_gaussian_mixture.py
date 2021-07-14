@@ -30,7 +30,7 @@ def _check_weights(weights, n_components):
 
     Returns
     -------
-    weights : array, shape (n_components,)
+    weights : array-like, shape (n_components,)
     """
     weights = check_array(weights, dtype=[np.float64, np.float32],
                           ensure_2d=False)
@@ -66,7 +66,7 @@ def _check_means(means, n_components, n_features):
 
     Returns
     -------
-    means : array, (n_components, n_features)
+    means : array-like, (n_components, n_features)
     """
     means = check_array(means, dtype=[np.float64, np.float32], ensure_2d=False)
     _check_shape(means, (n_components, n_features), 'means')
@@ -115,7 +115,7 @@ def _check_precisions(precisions, covariance_type, n_components, n_features):
 
     Returns
     -------
-    precisions : array
+    precisions : array-like
     """
     precisions = check_array(precisions, dtype=[np.float64, np.float32],
                              ensure_2d=False,
@@ -201,7 +201,7 @@ def _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar):
 
     Parameters
     ----------
-    responsibilities : array-like, shape (n_samples, n_components)
+    resp : array-like, shape (n_samples, n_components)
 
     X : array-like, shape (n_samples, n_features)
 
@@ -227,7 +227,7 @@ def _estimate_gaussian_covariances_spherical(resp, X, nk, means, reg_covar):
 
     Parameters
     ----------
-    responsibilities : array-like, shape (n_samples, n_components)
+    resp : array-like, shape (n_samples, n_components)
 
     X : array-like, shape (n_samples, n_features)
 

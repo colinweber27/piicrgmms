@@ -8,7 +8,7 @@ import math
 import numpy as np
 from scipy.special import betaln, digamma, gammaln
 
-from ._base import StrictBayesianBaseMixture, _check_shape
+from ._base import StrictBayesianBaseModel, _check_shape
 from ._gaussian_mixture import _check_precision_matrix
 from ._gaussian_mixture import _check_precision_positivity
 from ._gaussian_mixture import _compute_log_det_cholesky
@@ -45,7 +45,7 @@ def _log_wishart_norm(degrees_of_freedom, log_det_precisions_chol, n_features):
         The number of degrees of freedom on the covariance Wishart
         distributions.
 
-    log_det_precision_chol : array-like, shape (n_components,)
+    log_det_precisions_chol : array-like, shape (n_components,)
          The determinant of the precision matrix for each component.
 
     n_features : int
@@ -63,7 +63,7 @@ def _log_wishart_norm(degrees_of_freedom, log_det_precisions_chol, n_features):
                                   np.arange(n_features)[:, np.newaxis])), 0))
 
 
-class StrictBayesianGaussianMixture(StrictBayesianBaseMixture):
+class StrictBayesianGaussianMixture(StrictBayesianBaseModel):
     """Strict Variational Bayesian estimation of a Gaussian mixture.
 
     This class allows to infer an approximate posterior distribution over the

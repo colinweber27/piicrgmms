@@ -48,7 +48,7 @@ def _check_X(X, n_components=None, n_features=None, ensure_min_samples=1):
 
     Returns
     -------
-    X : array, shape (n_samples, n_features)
+    X : array-like, shape (n_samples, n_features)
     """
     X = check_array(X, dtype=[np.float64, np.float32],
                     ensure_min_samples=ensure_min_samples)
@@ -130,32 +130,6 @@ class BaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):
         """
         pass
 
-    def _initialize_parameters(self, X, random_state):
-        """Initialize the model parameters.
-
-        Parameters
-        ----------
-        X : array-like, shape  (n_samples, n_features)
-
-        random_state : RandomState
-            A random number generator instance that controls the random seed
-            used for the method chosen to initialize the parameters.
-        """
-        n_samples, _ = X.shape
-
-        if self.init_params == 'kmeans':
-            resp = np.zeros((n_samples, self.n_components))
-            label = cluster.KMeans(n_clusters=self.n_components, n_init=1,
-                                   random_state=random_state).fit(X).labels_
-            resp[np.arange(n_samples), label] = 1
-        elif self.init_params == 'random':
-            resp = random_state.rand(n_samples, self.n_components)
-            resp /= resp.sum(axis=1)[:, np.newaxis]
-        else:
-            raise ValueError("Unimplemented initialization method '%s'"
-                             % self.init_params)
-
-        self._initialize(X, resp)
 
     def _initialize_parameters(self, X, random_state):
         """Initialize the model parameters.
@@ -1175,7 +1149,7 @@ class PhaseConstrainedBaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta
             print("Initialization converged: %s\t time lapse %.5fs\t ll %.5f" %
                   (self.converged_, time() - self._init_prev_time, ll))
 
-class StrictBayesianBaseMixture(DensityMixin, BaseEstimator, metaclass=ABCMeta):
+class StrictBayesianBaseModel(DensityMixin, BaseEstimator, metaclass=ABCMeta):
     """Base class for mixture models.
 
     This abstract class specifies an interface for all mixture classes and

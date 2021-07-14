@@ -31,7 +31,7 @@ def _check_weights(weights, n_components):
 
     Returns
     -------
-    weights : array, shape (n_components,)
+    weights : array-like, shape (n_components,)
     """
     weights = check_array(weights, dtype=[np.float64, np.float32],
                           ensure_2d=False)
@@ -50,6 +50,7 @@ def _check_weights(weights, n_components):
                          "but got sum(weights) = %.5f" % np.sum(weights))
     return weights
 
+
 def _check_phases(phases, n_components):
     """Check the user provided 'phases'.
 
@@ -63,10 +64,10 @@ def _check_phases(phases, n_components):
 
     Returns
     -------
-    phases : array, shape (n_components,)
+    phases : array-like, shape (n_components,)
     """
     phases = check_array(phases, dtype=[np.float64, np.float32],
-                          ensure_2d=False)
+                         ensure_2d=False)
     _check_shape(phases, (n_components,), 'phases')
 
     # check range
@@ -84,6 +85,7 @@ def _check_phases(phases, n_components):
 
     return phases
 
+
 def _check_means(means, n_components, n_features):
     """Validate the provided 'means'.
 
@@ -100,11 +102,12 @@ def _check_means(means, n_components, n_features):
 
     Returns
     -------
-    means : array, (n_components, n_features)
+    means : array-like, (n_components, n_features)
     """
     means = check_array(means, dtype=[np.float64, np.float32], ensure_2d=False)
     _check_shape(means, (n_components, n_features), 'means')
     return means
+
 
 def _check_labels_init(labels_init, n_samples):
     """Validate the provided 'labels_init'.
@@ -114,12 +117,9 @@ def _check_labels_init(labels_init, n_samples):
     labels_init : array-like, shape (n_components,)
         The initial labels of the data based off of a 1D GMM BIC Fit on the phase dimension.
 
-    n_components : int
-        Number of components.
-
     Returns
     -------
-    phases : array, (n_components,)
+    phases : array-like, (n_components,)
     """
     labels_init = check_array(labels_init, dtype=[np.float64, np.float32], ensure_2d=False)
     _check_shape(labels_init, (n_samples,), 'labels_init')
@@ -168,7 +168,7 @@ def _check_precisions(precisions, covariance_type, n_components, n_features):
 
     Returns
     -------
-    precisions : array
+    precisions : array-like
     """
     precisions = check_array(precisions, dtype=[np.float64, np.float32],
                              ensure_2d=False,
@@ -254,7 +254,7 @@ def _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar):
 
     Parameters
     ----------
-    responsibilities : array-like, shape (n_samples, n_components)
+    resp : array-like, shape (n_samples, n_components)
 
     X : array-like, shape (n_samples, n_features)
 
@@ -280,7 +280,7 @@ def _estimate_gaussian_covariances_spherical(resp, X, nk, means, reg_covar):
 
     Parameters
     ----------
-    responsibilities : array-like, shape (n_samples, n_components)
+    resp : array-like, shape (n_samples, n_components)
 
     X : array-like, shape (n_samples, n_features)
 
@@ -330,13 +330,13 @@ def _phase_constrained_estimate_gaussian_parameters(X, resp, reg_covar, covarian
         The covariance matrix of the current components.
         The shape depends of the covariance_type.
     """
-    if phases.all() != None:
+    if phases.all() is not None:
         nk = resp.sum(axis=0) + 10 * np.finfo(resp.dtype).eps
         n_components = len(phases)
-        rad_means = np.dot(resp.T, X[:,0]).reshape(-1,1) / nk[:, np.newaxis]
+        rad_means = np.dot(resp.T, X[:, 0]).reshape(-1, 1) / nk[:, np.newaxis]
         means = np.zeros((n_components, 2))
-        means[:,0] = rad_means.reshape(n_components,)
-        means[:,1] = phases
+        means[:, 0] = rad_means.reshape(n_components,)
+        means[:, 1] = phases
         covariances = {"full": _estimate_gaussian_covariances_full,
                        "tied": _estimate_gaussian_covariances_tied,
                        "diag": _estimate_gaussian_covariances_diag,
@@ -693,7 +693,7 @@ class PhaseConstrainedGaussianMixture(PhaseConstrainedBaseMixture):
 
         if self.phases is not None:
             self.phases = _check_phases(self.phases,
-                                               self.n_components)
+                                        self.n_components)
 
         if self.labels_init is not None:
             self.labels_init = _check_labels_init(self.labels_init,
@@ -758,7 +758,7 @@ class PhaseConstrainedGaussianMixture(PhaseConstrainedBaseMixture):
         n_samples, _ = X.shape
         self.weights_, self.means_, self.covariances_ = (
             _phase_constrained_estimate_gaussian_parameters(X, np.exp(log_resp), self.reg_covar,
-                                          self.covariance_type, self.phases))
+                                                            self.covariance_type, self.phases))
         self.weights_ /= n_samples
         self.precisions_cholesky_ = _compute_precision_cholesky(
             self.covariances_, self.covariance_type)
