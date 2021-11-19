@@ -577,7 +577,7 @@ class DataFrame:
         plt.ylabel('Y [mm]')
 
         # Plot the data
-        plt.pcolormesh(x_edges, y_edges, ions, cmap='viridis')
+        plt.pcolormesh(x_edges, y_edges, ions, cmap='plasma')
         c_bar = plt.colorbar()
         c_bar.set_label('Counts')
 

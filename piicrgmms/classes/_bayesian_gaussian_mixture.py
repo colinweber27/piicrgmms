@@ -417,6 +417,12 @@ class BayesianGaussianMixture(GaussianMixtureBase):
                   'aquamarine', 'cornflowerblue', 'saddlebrown',
                   'lightgray']
 
+        # Alternative colors that are nameless but maximize
+        # contrast in both hue and lightness.
+        # colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99',
+        #           '#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a',
+        #           '#ffff99','#b15928']
+
         self.colors_ = []
         for i in self.unique_labels_:
             self.colors_.append(colors[i])
@@ -927,8 +933,12 @@ class BayesianGaussianMixture(GaussianMixtureBase):
             x1_values = np.multiply(rads, np.cos(phases))
             x2_values = np.multiply(rads, np.sin(phases))
 
-        ax.plot_surface(x1_values, x2_values, gmm_values,
-                        cmap='viridis')
+        surface = ax.plot_surface(x1_values, x2_values, gmm_values,
+                                  cmap=plt.cm.get_cmap('viridis').reversed(),
+                                  norm=pltcolors.LogNorm())
+        colorbar = fig.colorbar(surface, fraction=0.03, pad=0.1)
+        colorbar.set_label('Probability Density')
+
         title_string = 'BGM PDF (Cov type=%s, ' \
                        'n-components=%i)\n' % (self.cov_type,
                                                self.n_comps_found_)
@@ -942,7 +952,6 @@ class BayesianGaussianMixture(GaussianMixtureBase):
         plt.title(title_string)
         ax.set_xlabel('X (mm)')
         ax.set_ylabel('Y (mm)')
-        ax.set_zlabel('Probability Density')
 
         save_string = 'BGM %s PDF, %s, %s, %s Clusters, ' \
                       'timecut=%s,radcut=%s,tofcut=%s,' \

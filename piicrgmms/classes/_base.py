@@ -104,6 +104,7 @@ class GaussianMixtureBase(metaclass=ABCMeta):
 
     version : 0.1
     """
+
     def __init__(self, n_components: int, cov_type: str, tol: float, max_iter: int,
                  n_init: int):
         self.n_components = n_components
@@ -299,6 +300,11 @@ class GaussianMixtureBase(metaclass=ABCMeta):
                   'deeppink', 'tan', 'rosybrown', 'khaki',
                   'aquamarine', 'cornflowerblue', 'saddlebrown',
                   'lightgray']
+        # Alternative colors that are nameless but maximize
+        # contrast in both hue and lightness.
+        # colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99',
+        #           '#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a',
+        #           '#ffff99','#b15928']
 
         self.noise_colors_ = []
 
@@ -307,7 +313,7 @@ class GaussianMixtureBase(metaclass=ABCMeta):
 
         for i in range(self.n_comps_found_):
             if self.centers_array_[i, 7] > 5 * weighted_phase_err or \
-                self.centers_array_[i, 8] > 5 * weighted_clust_err or \
+                    self.centers_array_[i, 8] > 5 * weighted_clust_err or \
                     self.ips_[i] <= 10:
                 self.noise_colors_.append(colors[self.unique_labels_[i]])
 
@@ -422,7 +428,7 @@ class GaussianMixtureBase(metaclass=ABCMeta):
             An empty list that will hold the colors to be merged.
         """
         plt.close()
-        
+
         fig, _ = self.get_results_fig(data_frame_object=data_frame_object)
 
         canvas = FigureCanvas(fig)  # Initialize the canvas, which is the renderer that works with RGB values
@@ -496,6 +502,11 @@ class GaussianMixtureBase(metaclass=ABCMeta):
                               'deeppink', 'tan', 'rosybrown', 'khaki',
                               'aquamarine', 'cornflowerblue', 'saddlebrown',
                               'lightgray']
+                    # Alternative colors that are nameless but maximize
+                    # contrast in both hue and lightness.
+                    # colors = ['#a6cee3','#1f78b4','#b2df8a','#33a02c','#fb9a99',
+                    #           '#e31a1c','#fdbf6f','#ff7f00','#cab2d6','#6a3d9a',
+                    #           '#ffff99','#b15928']
 
                     # Find indexes of colors
                     true_index_list = []  # Corresponds to the indices of the clusters in centers_array
@@ -535,7 +546,7 @@ class GaussianMixtureBase(metaclass=ABCMeta):
                         for n in self.unique_labels_:
                             cluster_ions = labels_list.count(n)
                             ips.append(cluster_ions)
-                        self.ips_ = np.array(ips).reshape(-1,)
+                        self.ips_ = np.array(ips).reshape(-1, )
 
                         merged_cluster_true_index = \
                             true_index_keep - \
