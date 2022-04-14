@@ -178,7 +178,7 @@ class DataFrame:
 
     def __init__(self, file, *, center=(0, 0), center_unc=(0, 0), rad_cut=(0, np.inf),
                  ion_cut=(0, np.inf), tof_cut=(-50000, -10000), time_cut=(0, np.inf),
-                 phase_units='deg'):
+                 phase_units='deg'), sumx_cut=(45,48), sumy_cut=(42,47):
         if not isinstance(file, str):
             file = str(file)
         self.file = file
@@ -189,6 +189,8 @@ class DataFrame:
         self.tof_cut = tof_cut
         self.time_cut = time_cut
         self.phase_units = phase_units
+        self.sumx_cut = sumx_cut
+        self.sumy_cut= sumy_cut
         self.processed_ = False
         self.phase_shifted_ = False
         self.data_frame_ = None
@@ -260,7 +262,34 @@ class DataFrame:
                              "first the lower limit, and"
                              "then the upper limit, of the"
                              "allowable time stamps for the data.")
+        
+        if not isinstance(self.sumx_cut, tuple):
+            raise TypeError("The parameter 'sumx_cut' "
+                            "should be a tuple, but got "
+                            "type %s instead." %
+                            type(self.time_cut))
 
+        if self.sumx_cut[0] >= self.sumx_cut[1]:
+            raise ValueError("The parameter 'sumx_cut' "
+                             "should be a tuple listing"
+                             "first the lower limit, and"
+                             "then the upper limit, of the"
+                             "allowable time stamps for the data.")
+            
+        if not isinstance(self.sumy_cut, tuple):
+            raise TypeError("The parameter 'sumy_cut' "
+                            "should be a tuple, but got "
+                            "type %s instead." %
+                            type(self.time_cut))
+
+        if self.sumy_cut[0] >= self.sumy_cut[1]:
+            raise ValueError("The parameter 'sumy_cut' "
+                             "should be a tuple listing"
+                             "first the lower limit, and"
+                             "then the upper limit, of the"
+                             "allowable time stamps for the data.")
+            
+            
         if not isinstance(self.phase_units, str):
             raise TypeError("The parameter 'phase_units' "
                             "should be a string, but got type "
@@ -441,9 +470,13 @@ class DataFrame:
         # there were too many ions, or it took too long
         # to get to the PS-MCP from the trap, it's also cut from the
         # data set.
-        data_df_prel = data_df_prel.query('45<SumX<48')
-        data_df_prel = data_df_prel.query('44<SumY<47')
-
+        data_df_prel = data_df_prel.query(
+            '%i<SumX<%i' % (
+                self.sumx_cut[0], self.sumx_cut[1]))  # sumx_cut
+        data_df_prel = data_df_prel.query(
+            '%i<SumY<%i' % (
+                self.sumy_cut[0], self.sumy_cut[1]))  # sumy_cut
+        
         data_df_prel = data_df_prel.reset_index().set_index("trig")
         data_df_prel["Ions_that_shot"] = \
             data_df_prel.reset_index().groupby("trig").trig.count()
