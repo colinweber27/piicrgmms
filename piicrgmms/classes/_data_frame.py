@@ -178,7 +178,7 @@ class DataFrame:
 
     def __init__(self, file, *, center=(0, 0), center_unc=(0, 0), rad_cut=(0, np.inf),
                  ion_cut=(0, np.inf), tof_cut=(-50000, -10000), time_cut=(0, np.inf),
-                 phase_units='deg'), sumx_cut=(45,48), sumy_cut=(42,47):
+                 phase_units='deg', sumx_cut=(45,48), sumy_cut=(42,47)):
         if not isinstance(file, str):
             file = str(file)
         self.file = file
