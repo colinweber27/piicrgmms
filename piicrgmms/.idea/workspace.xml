@@ -1,17 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="7d5b6a75-5e4c-4f3f-a940-18872a3d1f0f" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/../piicrgmms.egg-info/PKG-INFO" beforeDir="false" afterPath="$PROJECT_DIR$/../piicrgmms.egg-info/PKG-INFO" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/_base.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/_base.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/_bayesian_gaussian_mixture.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/_bayesian_gaussian_mixture.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/_data_frame.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/_data_frame.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/_gaussian_mixture_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/_gaussian_mixture_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/classes/_phase_first_gaussian_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/classes/_phase_first_gaussian_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../setup.cfg" beforeDir="false" afterPath="$PROJECT_DIR$/../setup.cfg" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/../setup.py" afterDir="false" />
-    </list>
+    <list default="true" id="7d5b6a75-5e4c-4f3f-a940-18872a3d1f0f" name="Default Changelist" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
