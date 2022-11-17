@@ -1277,7 +1277,9 @@ class GaussianMixtureModel(GaussianMixtureBase):
             loc='center left', bbox_to_anchor=(1, 0.5), numpoints=1,
             fontsize=10, labelspacing=0.5)
         for j in range(len(legend_stuff.legendHandles)):
-            legend_stuff.legendHandles[j]._legmarker.set_markersize(10)
+            #legend_stuff.legendHandles[j]._legmarker.set_markersize(10)
+            legend_stuff = plt.legend(loc = 'center left', bbox_to_anchor = (1,0.5), numpoints = 1, fontsize=12, markerscale = 2) ## , prop = legend_properties
+
 
         plt.grid()
 
